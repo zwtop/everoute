@@ -49,3 +49,4 @@ linters:
     - unused
     - varcheck
     - whitespace
+
