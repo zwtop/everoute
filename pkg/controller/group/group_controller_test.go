@@ -79,7 +79,7 @@ var _ = Describe("GroupController", func() {
 		BeforeEach(func() {
 			epGroup = newTestEndpointGroup(map[string]string{"label.key": "label.value"})
 
-			By(fmt.Sprintf("create endpointgroup %s with selector %v", epGroup.Name, epGroup.Spec.Selector))
+			By(fmt.Sprintf("create endpointgroup %s with selector %v", epGroup.Name, epGroup.Spec.EndpointSelector))
 			Expect(k8sClient.Create(ctx, epGroup)).Should(Succeed())
 		})
 		Context("none endpoint in the group", func() {
@@ -159,9 +159,9 @@ var _ = Describe("GroupController", func() {
 				BeforeEach(func() {
 					// the group has been modify by controller, retrieve it.
 					Expect(k8sClient.Get(ctx, client.ObjectKey{Name: epGroup.Name}, epGroup))
-					epGroup.Spec.Selector = nil
+					epGroup.Spec.EndpointSelector = nil
 
-					By(fmt.Sprintf("change endpointgroup %s selector to %v", epGroup.Name, epGroup.Spec.Selector))
+					By(fmt.Sprintf("change endpointgroup %s selector to %v", epGroup.Name, epGroup.Spec.EndpointSelector))
 					Expect(k8sClient.Update(ctx, epGroup)).Should(Succeed())
 				})
 				It("should create patch remove the endpoint", func() {
@@ -214,7 +214,7 @@ var _ = Describe("GroupController", func() {
 					if err != nil {
 						return err
 					}
-					epGroup.Spec.Selector = nil
+					epGroup.Spec.EndpointSelector = nil
 					return k8sClient.Update(ctx, epGroup)
 				}, timeout, interval).Should(Succeed())
 			})
@@ -235,7 +235,7 @@ var _ = Describe("GroupController", func() {
 			BeforeEach(func() {
 				epGroup = newTestEndpointGroup(map[string]string{})
 
-				By(fmt.Sprintf("create endpointgroup %s with selector %v", epGroup.Name, epGroup.Spec.Selector))
+				By(fmt.Sprintf("create endpointgroup %s with selector %v", epGroup.Name, epGroup.Spec.EndpointSelector))
 				Expect(k8sClient.Create(ctx, epGroup)).Should(Succeed())
 			})
 
@@ -313,7 +313,7 @@ func newTestEndpointGroup(matchLabels map[string]string) *groupv1alpha1.Endpoint
 			Labels: map[string]string{TestLabelKey: TestLabelValue},
 		},
 		Spec: groupv1alpha1.EndpointGroupSpec{
-			Selector: &metav1.LabelSelector{
+			EndpointSelector: &metav1.LabelSelector{
 				MatchLabels: matchLabels,
 			},
 		},
