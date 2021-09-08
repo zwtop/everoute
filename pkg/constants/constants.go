@@ -25,4 +25,6 @@ const (
 	DependentsCleanFinalizer         = "finalizer.lynx.smartx.com/dependentsclean"
 	OwnerGroupLabelKey               = "label.lynx.smartx.com/ownergroup"
 	OwnerPolicyLabelKey              = "label.lynx.smartx.com/ownerpolicy"
+
+	SecurityPolicyByEndpointGroupIndex = "SecurityPolicyByEndpointGroupIndex"
 )
