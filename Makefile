@@ -7,9 +7,16 @@ bin: controller agent e2e-tools
 
 images:
 	docker build -f build/images/release/Dockerfile -t lynx/release .
+	docker build -f build/images/generate/Dockerfile -t everoute/generate ./build/images/generate/
 
 yaml:
-	find deploy -name "*.yaml" | xargs cat | cat > deploy/lynx.yaml
+	find deploy -name "*.yaml" | grep -v ^deploy/lynx.yaml$ | sort -u | xargs cat | cat > deploy/lynx.yaml
+
+generate: codegen gqlgen manifests yaml
+
+docker-generate:
+	$(eval WORKDIR := /go/src/github.com/smartxworks/lynx)
+	docker run --rm -u $$(id -u):$$(id -g) -w $(WORKDIR) -v $(CURDIR):$(WORKDIR) everoute/generate make generate
 
 controller:
 	CGO_ENABLED=0 go build -o bin/lynx-controller cmd/lynx-controller/main.go
@@ -41,6 +48,10 @@ codegen: manifests
 		--api-versions group/v1alpha1 \
 		--api-versions policyrule/v1alpha1 \
 		--api-versions security/v1alpha1
+
+# Generate plugin-tower gql codes
+gqlgen:
+	cd plugin/tower/pkg/server/fake/ && gqlgen generate
 
 deploy-test:
 	bash hack/deploy.sh
