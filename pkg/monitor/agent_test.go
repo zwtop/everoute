@@ -174,8 +174,8 @@ func TestAgentMonitorRestart(t *testing.T) {
 			monitor.ipCacheLock.RLock()
 			defer monitor.ipCacheLock.RUnlock()
 			fmt.Printf("===dump ipCache=====%+v\n", monitor.ipCache)
-	var agentInfoList agentv1alpha1.AgentInfoList
-	k8sClient.List(context.Background(), &agentInfoList)
+			var agentInfoList agentv1alpha1.AgentInfoList
+			_ = k8sClient.List(context.Background(), &agentInfoList)
 			fmt.Printf("===dump agentInfo===%+v\n", agentInfoList)
 			return monitor.ipCache[fmt.Sprintf("%s-%d", brName, ofport)]
 		}, timeout, interval).Should(Equal(ipAddr))
