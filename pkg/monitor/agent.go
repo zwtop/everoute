@@ -355,6 +355,7 @@ func (monitor *AgentMonitor) rebuildOfportCache() error {
 		// ignore NotFoundError, agentInfo hasn't been created yet
 		return client.IgnoreNotFound(err)
 	}
+	fmt.Printf("====dump agentinfo====%+v\n", agentInfo)
 
 	monitor.ipCacheLock.Lock()
 	defer monitor.ipCacheLock.Unlock()
