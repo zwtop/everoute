@@ -12,11 +12,11 @@ images:
 yaml:
 	find deploy -name "*.yaml" | grep -v ^deploy/lynx.yaml$ | sort -u | xargs cat | cat > deploy/lynx.yaml
 
-generate: codegen gqlgen manifests yaml
+generate: codegen gqlgen protopb manifests yaml
 
 docker-generate:
 	$(eval WORKDIR := /go/src/github.com/smartxworks/lynx)
-	docker run --rm -u $$(id -u):$$(id -g) -w $(WORKDIR) -v $(CURDIR):$(WORKDIR) everoute/generate make generate
+	docker run --rm -iu $$(id -u):$$(id -g) -w $(WORKDIR) -v $(CURDIR):$(WORKDIR) everoute/generate make generate
 
 controller:
 	CGO_ENABLED=0 go build -o bin/lynx-controller cmd/lynx-controller/main.go
@@ -52,6 +52,9 @@ codegen: manifests
 # Generate plugin-tower gql codes
 gqlgen:
 	cd plugin/tower/pkg/server/fake/ && gqlgen generate
+
+protopb:
+	protoc -I=. --go_out=plugins=grpc:.  pkg/apis/cni/v1alpha1/cni.proto
 
 deploy-test:
 	bash hack/deploy.sh
