@@ -3,6 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/everoute/everoute)](https://goreportcard.com/report/github.com/everoute/everoute)
 [![codecov](https://codecov.io/gh/everoute/everoute/branch/main/graph/badge.svg)](https://codecov.io/gh/everoute/everoute)
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](https://github.com/everoute/everoute/blob/main/LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzwtop%2Feveroute.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzwtop%2Feveroute?ref=badge_shield)
 
 ## Overview
 
@@ -94,3 +95,5 @@ as AV, IPS, IDS, traffic monitor etc.
 ## License
 
 Everoute is licensed under the [Apache License, version 2.0](LICENSE)
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzwtop%2Feveroute.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzwtop%2Feveroute?ref=badge_large)
