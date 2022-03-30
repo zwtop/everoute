@@ -1,5 +1,6 @@
 # everoute
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/430ac74b51a145258f1ccc6c54745272)](https://app.codacy.com/gh/zwtop/everoute?utm_source=github.com&utm_medium=referral&utm_content=zwtop/everoute&utm_campaign=Badge_Grade_Settings)
 [![Go Report Card](https://goreportcard.com/badge/github.com/everoute/everoute)](https://goreportcard.com/report/github.com/everoute/everoute)
 [![codecov](https://codecov.io/gh/everoute/everoute/branch/main/graph/badge.svg)](https://codecov.io/gh/everoute/everoute)
 [![License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](https://github.com/everoute/everoute/blob/main/LICENSE)
