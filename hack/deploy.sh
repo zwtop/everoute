@@ -18,29 +18,9 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-function wait_for_up() {
-  for i in {1..100}; do
-    echo `kubectl get po -Aowide | grep ${1}`
-    status=$(kubectl get po -Aowide | grep Running | grep ${1} || true)
-    if [[ x${status} != x"" ]]; then
-      echo "success wait ${1} setup"
-      break
-    fi
-    if [[ ${i} == 100 ]]; then
-      echo "failed wait for ${1} setup"
-      exit 1
-    fi
-    sleep 2
-    echo "${i} times, wait for ${1} setup ..."
-  done
-}
-
-local_path=$(dirname "$(readlink -f ${0})")
-kubectl apply -f ${local_path}/../deploy/everoute.yaml
-
-
-### wait for pods setup
-wait_for_up everoute-controller
+local_path=$(dirname "$(readlink -f "${0}")")
+kubectl apply -f "${local_path}"/../deploy/everoute.yaml
+kubectl wait po -n kube-system --for=condition=Ready -l app=everoute --timeout=3m
 
 echo "========================================================="
 echo " "

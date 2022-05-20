@@ -16,5 +16,6 @@
 
 set -o nounset
 
-local_path=$(dirname "$(readlink -f ${0})")
-kubectl delete -f ${local_path}/../deploy/everoute.yaml
+local_path=$(dirname "$(readlink -f "${0}")")
+kubectl delete -f "${local_path}"/../deploy/everoute.yaml
+kubectl wait po -n kube-system --for=delete -l app=everoute --timeout=3m

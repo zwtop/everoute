@@ -82,7 +82,7 @@ jobs:
         run: sudo skaffold run -d=harbor.smartx.com/everoute
 
       - name: wait everoute ready
-        run: bash hack/check_ready.sh
+        run: kubectl wait po -n kube-system --for=condition=Ready -l app=everoute --timeout=3m
 
       - uses: actions/checkout@v2
         with:
