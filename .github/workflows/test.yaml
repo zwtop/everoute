@@ -1,0 +1,76 @@
+name: test
+
+on:
+  workflow_call:
+
+  pull_request:
+    branches: [ main ]
+
+  push:
+    branches: [ main ]
+
+  schedule:
+    # 7:00 UTC+8
+    - cron: "0 23 * * *"
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: run everoute unit test
+        run: |
+          sudo make docker-test
+          sudo make docker-race-test
+          sudo make docker-cover-test
+
+      - uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.out
+
+  run-e2e:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install e2e environment dependency
+        run: sudo sh -c "apt update && apt install -y openvswitch-switch && systemctl start openvswitch-switch"
+
+      - name: allow ssh connect to localhost
+        run: sudo -H sh -c "ssh-keygen -qN '' </dev/zero; cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys"
+
+      - name: setup e2e environment
+        run: sudo -H bash tests/e2e/scripts/e2e-setup.sh
+
+      - name: run e2e test cases
+        run: sudo -H make e2e-test
+
+  run-k8s-e2e:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: build everoute and deploy
+        run: sudo skaffold run -d=harbor.smartx.com/everoute
+
+      - name: wait everoute ready
+        run: sleep 10 && kubectl wait po -n kube-system --for=condition=Ready -l app=everoute --timeout=3m
+
+      - uses: actions/checkout@v2
+        with:
+          repository: 'kubernetes/kubernetes'
+          ref: 'v1.21.5'
+          path: './kubernetes'
+
+      - name: apply e2e patch
+        run: cd kubernetes && git apply ../hack/0001-test-e2e-add-sleep-before-cannot-conntect-test.patch
+
+      - name: build e2e
+        run: cd kubernetes && make all WHAT=test/e2e/e2e.test && make all WHAT=vendor/github.com/onsi/ginkgo/ginkgo
+
+      - name: remove remained ns in last test
+        run: kubectl get ns | grep "policy\|netpol"  | awk '{print $1}' | xargs kubectl delete ns || echo "finish"
+
+      - name: run test cases
+        run: bash hack/run-k8s-e2e.sh

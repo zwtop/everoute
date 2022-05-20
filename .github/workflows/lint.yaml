@@ -1,0 +1,44 @@
+name: lint
+
+on:
+  workflow_call:
+
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  golint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.45
+          only-new-issues: true
+          skip-pkg-cache: true
+          skip-build-cache: true # skip cache because of flaky behaviors
+
+  generate-check:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: make docker-generate
+        run: sudo sh -c "make image-generate && make docker-generate"
+
+      - name: check if code changes
+        run: sudo sh -c "git add -A && git diff HEAD --exit-code"
+
+      - name: show message if failed
+        if: ${{ failure() }}
+        run: echo "::error::Please run \"make generate\" or \"make docker-generate\" before commit."
+
+  commitlint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v4
+        with:
+          configFile: .commitlintrc.json

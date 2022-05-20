@@ -1,0 +1,103 @@
+name: notify
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    uses: .github/workflows/lint.yaml
+
+  test:
+    uses: .github/workflows/test.yaml
+
+  code-analysis:
+    uses: .github/workflows/code-analysis.yaml
+
+  slack-notification:
+    if: ${{ always() }}
+    needs: ["lint", "test", "code-analysis"]
+    runs-on: ubuntu-20.04
+    env:
+      SLACK_COLOR: 2EA44F
+      RESULT_RUN_LINT: ":white_check_mark:"
+      RESULT_RUN_TEST: ":white_check_mark:"
+      RESULT_CODE_ANALYSIS: ":white_check_mark:"
+    steps:
+      - if: ${{ needs.lint.result == 'failure'}}
+        run: echo "SLACK_COLOR=DF0000" >> $GITHUB_ENV && echo "RESULT_RUN_LINT=:x:" >> $GITHUB_ENV
+      - if: ${{ needs.test.result == 'failure'}}
+        run: echo "SLACK_COLOR=DF0000" >> $GITHUB_ENV && echo "RESULT_RUN_TEST=:x:" >> $GITHUB_ENV
+      - if: ${{ needs.code-analysis.result == 'failure'}}
+        run: echo "SLACK_COLOR=DF0000" >> $GITHUB_ENV && echo "RESULT_CODE_ANALYSIS=:x:" >> $GITHUB_ENV
+
+      - if: ${{ needs.lint.result == 'cancelled'}}
+        run: echo "RESULT_RUN_LINT=:ballot_box_with_check:" >> $GITHUB_ENV
+      - if: ${{ needs.test.result == 'cancelled'}}
+        run: echo "RESULT_RUN_TEST=:ballot_box_with_check:" >> $GITHUB_ENV
+      - if: ${{ needs.code-analysis.result == 'cancelled'}}
+        run: echo "RESULT_CODE_ANALYSIS=:ballot_box_with_check:" >> $GITHUB_ENV
+
+      - name: generate short commit sha
+        run: echo "SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: send message to slack
+        uses: slackapi/slack-github-action@v1.17.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Finish Github Action CI, details <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} | `here`>"
+                  }
+                }
+              ],
+              "attachments": [
+                {
+                  "color": "${{ env.SLACK_COLOR }}",
+                  "blocks": [
+                    {"type": "section","fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*type: * ${{ github.event_name }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*ref: * ${{ github.ref }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*actor: * <${{ github.server_url }}/${{ github.actor }} | `${{ github.actor }}`>"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*commit: * <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }} | `${{ env.SHORT_SHA }}`>"
+                        }
+                    ]},
+                    {"type": "section","fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "${{ env.RESULT_RUN_LINT }} => *lint*"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "${{ env.RESULT_RUN_TEST }} => *test*"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "${{ env.RESULT_CODE_ANALYSIS }} => *run-e2e*"
+                      }
+                    ]}
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_E2E_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
