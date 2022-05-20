@@ -20,6 +20,16 @@ set -o nounset
 
 local_path=$(dirname "$(readlink -f "${0}")")
 kubectl apply -f "${local_path}"/../deploy/everoute.yaml
+
+for i in {1..100}; do
+  kubectl get po -Aowide
+  kubectl describe po -l app=everoute -n kube-system || true
+  kubectl logs -l component=everoute-agent -c init-agent -n kube-system || true
+  kubectl logs -l component=everoute-agent -c everoute-agent -n kube-system || true
+  kubectl logs -l component=everoute-controller -n kube-system || true
+  sleep 2
+done
+
 kubectl wait po -n kube-system --for=condition=Ready -l app=everoute --timeout=3m
 
 echo "========================================================="
