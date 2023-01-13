@@ -20,7 +20,7 @@ jobs:
       AAA: "BBB"
       BBB: "CCC"
     steps:
-      - run: echo ${{ ${{env.AAA}} }}
+      - run: echo ${{ \${{env.AAA}} }}
 
   pr-check:
     runs-on: [ubuntu-20.04]
