@@ -24,7 +24,7 @@ jobs:
         - project: bar
           config: Release
     steps:
-      - run: echo ${{ .project }}
+      - run: echo fdsafsafda
 
   pr-check:
     runs-on: [ubuntu-20.04]
