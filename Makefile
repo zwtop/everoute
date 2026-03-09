@@ -117,6 +117,10 @@ docker-e2e-test-ci:
 	$(eval WORKDIR := /go/src/github.com/everoute/everoute)
 	docker run --rm -iu 0:0 -e USER=root -w $(WORKDIR) -v $(CURDIR):$(WORKDIR) -v /lib/modules:/lib/modules --privileged registry.smtx.io/everoute/unit-test make docker-e2e-test-entry
 
+docker-tower-e2e-test-ci:
+	$(eval WORKDIR := /go/src/github.com/everoute/everoute)
+	docker run --rm -iu 0:0 -w $(WORKDIR) -v $(CURDIR):$(WORKDIR) -v $(HOME)/.kube:/.kube -e KUBECONFIG=/.kube/config -e GOPROXY=$(GOPROXY) golang:1.23 go test ./tests/e2e/cases/. -v --count=1 --timeout=1h
+
 docker-golint-check:
 	$(eval WORKDIR := /go/src/github.com/everoute/everoute)
 	docker run --rm -iu 0:0 -e USER=root -w $(WORKDIR) -v $(CURDIR):$(WORKDIR) golangci/golangci-lint:v1.53 golangci-lint run ./...
